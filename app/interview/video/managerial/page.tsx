@@ -1,4 +1,9 @@
-import { VideoInterviewChat } from "@/components/VideoInterviewChat";
+import dynamic from "next/dynamic";
+
+const VideoInterviewChat = dynamic(
+    () => import("@/components/VideoInterviewChat").then(mod => mod.VideoInterviewChat),
+    { ssr: false }
+);
 
 export default function VideoManagerialPage() {
     return (

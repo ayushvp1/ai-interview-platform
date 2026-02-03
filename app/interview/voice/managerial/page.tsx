@@ -1,4 +1,9 @@
-import { VoiceInterviewChat } from "@/components/VoiceInterviewChat";
+import dynamic from "next/dynamic";
+
+const VoiceInterviewChat = dynamic(
+    () => import("@/components/VoiceInterviewChat").then(mod => mod.VoiceInterviewChat),
+    { ssr: false }
+);
 
 export default function VoiceManagerialPage() {
     return (

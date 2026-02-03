@@ -1,4 +1,9 @@
-import { InterviewChat } from "@/components/InterviewChat";
+import dynamic from "next/dynamic";
+
+const InterviewChat = dynamic(
+    () => import("@/components/InterviewChat").then(mod => mod.InterviewChat),
+    { ssr: false }
+);
 
 export default function TechnicalInterviewPage() {
     return (
