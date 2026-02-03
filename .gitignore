@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local data & artifacts
+/interview_logs
+ai_interview_platform.zip

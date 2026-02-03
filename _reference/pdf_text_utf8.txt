@@ -1,0 +1,55 @@
+--- Page 1 ---
+Task Assignment: AI Mock Interview Platform 
+ Overview 
+Develop an AI-powered Mock Interview system designed to simulate real-world interview 
+scenarios. The platform should help users practice and improve their interview performance 
+through intelligent evaluation and instant feedback. 
+This feature will be a key value addition to our product and must be designed with 
+scalability and accuracy in mind. 
+ 
+ Objectives 
+• Simulate realistic interview environments 
+• Provide intelligent, actionable feedback 
+• Help users improve confidence, communication, and technical skills 
+ 
+ Core Functionalities 
+ Interview Types 
+The system should support the following interview formats: 
+• HR Interviews 
+• Technical Interviews 
+• Managerial / Behavioural Interviews 
+ 
+ Interaction Modes 
+Users should be able to take interviews using: 
+• Chat-based interaction 
+• Voice-based interaction 
+• Video-based interaction 
+ 
+ AI Evaluation Criteria 
+The AI engine should evaluate the candidate on: 
+• Confidence level 
+--- Page 2 ---
+• Communication clarity 
+• Technical accuracy and explanation 
+• Problem-solving approach 
+• Body language & facial expressions (for video mode) 
+ 
+ Feedback & Reporting 
+After each interview session, the system must provide: 
+ Instant performance score 
+•  Detailed feedback per evaluation parameter 
+•  Personalized improvement suggestions 
+•  Progress tracking for repeated attempts 
+ 
+Technical Expectations (High-Level) 
+• Modular and clean code structure 
+• API-based architecture for AI services 
+• Support for future integration of advanced models (speech, vision, NLP) 
+• Proper error handling and logging 
+ 
+ Deliverables 
+• Functional prototype of AI Mock Interview module 
+• Evaluation logic implementation 
+• Feedback and reporting mechanism 
+• Basic documentation explaining workflow and design decisions 
+ 

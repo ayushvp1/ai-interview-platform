@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Interview Platform - Setup & Handoff Guide
 
-## Getting Started
+This project is a Next.js-powered AI Mock Interview Platform featuring Text, Voice, and Video modes with real-time body language analysis.
 
-First, run the development server:
+## 🚀 How to Setup (For New Users)
 
+If you have received this project as a ZIP file, follow these steps to get it running:
+
+### 1. Extract and Install
+Extract the ZIP file and open the folder in your terminal.
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configure API Keys
+The project requires an API key from **LiteRouter**.
+1. Create a file named `.env.local` in the root directory.
+2. Copy the contents from `.env.example` into `.env.local`.
+3. Add your own API key:
+   - `LITEROUTER_API_KEY`: Get from [LiteRouter](https://literouter.com/)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Run the Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 📦 How to ZIP for Distribution
+When sharing this project, **DO NOT** include the following folders to keep the file size small and secure:
+- `node_modules/` (The user will run `npm install`)
+- `.next/` (Build artifacts)
+- `interview_logs/` (Your personal interview history)
+- `.env.local` (Your private API keys)
 
-To learn more about Next.js, take a look at the following resources:
+**Recommended Zip Command (if using CLI):**
+`zip -r project.zip . -x "node_modules/*" ".next/*" "interview_logs/*" ".env.local"`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠 Tech Stack
+- **Frontend:** Next.js, Tailwind CSS, Lucide Icons, Shadcn UI
+- **AI/ML:** LiteRouter (Gemini-2.0-Flash / Gemini-Free), face-api.js (for Video metrics)
+- **Audio:** Web Speech API
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📖 Additional Documentation
+For more detailed information on the technical architecture, design decisions, and core workflows, see:
+- [DESIGN_DOC.md](file:///c:/Users/ayush/OneDrive/Desktop/ai_interview_platform/DESIGN_DOC.md)
