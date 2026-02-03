@@ -1,6 +1,5 @@
 // Face Analysis Utilities using face-api.js
-import * as faceapi from '@vladmandic/face-api';
-
+let faceapi: any = null;
 let modelsLoaded = false;
 
 export interface ExpressionData {
@@ -37,9 +36,14 @@ export interface AggregatedMetrics {
 
 // Load face-api models
 export async function loadFaceModels(): Promise<boolean> {
-    if (modelsLoaded) return true;
+    if (typeof window === 'undefined') return false;
+    if (modelsLoaded && faceapi) return true;
 
     try {
+        if (!faceapi) {
+            faceapi = await import('@vladmandic/face-api');
+        }
+
         const MODEL_URL = '/models';
 
         await Promise.all([
