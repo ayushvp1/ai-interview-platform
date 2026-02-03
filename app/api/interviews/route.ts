@@ -7,6 +7,14 @@ export async function GET() {
         const logsDir = path.join(process.cwd(), "interview_logs");
 
         if (!fs.existsSync(logsDir)) {
+            try {
+                fs.mkdirSync(logsDir, { recursive: true });
+            } catch (e) {
+                return NextResponse.json({ interviews: [] });
+            }
+        }
+
+        if (!fs.existsSync(logsDir)) {
             return NextResponse.json({ interviews: [] });
         }
 

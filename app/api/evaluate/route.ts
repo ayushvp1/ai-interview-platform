@@ -10,7 +10,11 @@ function saveInterviewLog(data: any) {
         const logsDir = path.join(process.cwd(), "interview_logs");
 
         if (!fs.existsSync(logsDir)) {
-            fs.mkdirSync(logsDir, { recursive: true });
+            try {
+                fs.mkdirSync(logsDir, { recursive: true });
+            } catch (mkdirError) {
+                console.warn("Could not create interview_logs directory (expected on Vercel)");
+            }
         }
 
         const timestamp = new Date().toISOString().replace(/:/g, "-");
@@ -20,7 +24,8 @@ function saveInterviewLog(data: any) {
         fs.writeFileSync(filepath, JSON.stringify(data, null, 2));
         console.log(`Interview log saved: ${filename}`);
     } catch (error) {
-        console.error("Error saving interview log:", error);
+        // Handle read-only filesystem (like Vercel) gracefully
+        console.warn("Could not save interview log to filesystem (expected in serverless environments like Vercel).", error);
     }
 }
 
