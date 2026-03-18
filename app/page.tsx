@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Code, Users, Briefcase, Play, Mic, Video, ChevronRight, Star, CheckCircle, TrendingUp, Award, Shield, Zap, BarChart3, Clock, Target } from "lucide-react";
 import { useEffect, useState } from "react";
+
 
 export default function Home() {
   // Clear any previous interview data when returning to home
@@ -20,13 +22,10 @@ export default function Home() {
       {/* Navigation Bar */}
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center">
-              <Zap className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-xl font-bold text-slate-900">InterviewAI</span>
-          </div>
-          <div className="flex items-center gap-6">
+          <Link href="/" className="flex items-center gap-10">
+            <Image src="/logo.png" alt="AI Interview Platform" width={1000} height={1000} className="h-12 w-auto object-contain scale-300 origin-left" />
+          </Link>
+          <div className="flex items-center gap-10">
             <Link href="/dashboard" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">
               Dashboard
             </Link>
@@ -370,19 +369,17 @@ export default function Home() {
       <footer className="bg-slate-900 py-12">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-xl font-bold text-white">InterviewAI</span>
-            </div>
+            <Link href="/" className="flex items-center gap-3">
+              <Image src="/logo.png" alt="AI Interview Platform" width={180} height={45} className="h-12 w-auto object-contain" />
+              <span className="text-xl font-bold text-white">AI Interview Platform</span>
+            </Link>
             <div className="flex items-center gap-8 text-slate-400">
               <Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
               <Link href="/history" className="hover:text-white transition-colors">History</Link>
               <Link href="/video-test" className="hover:text-white transition-colors">Video Test</Link>
             </div>
             <div className="text-slate-500 text-sm">
-              © 2026 InterviewAI. All rights reserved.
+              © 2026 Ai interview platform. All rights reserved.
             </div>
           </div>
         </div>
