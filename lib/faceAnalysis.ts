@@ -89,9 +89,8 @@ export async function analyzeFrame(video: HTMLVideoElement): Promise<FaceAnalysi
         // Estimate head pose from landmarks for more precise eye contact
         const noseTop = nose[0];
         const noseBottom = nose[nose.length - 1];
-        const leftEyeCenter = { x: leftEye.reduce((s, p) => s + p.x, 0) / leftEye.length, y: leftEye.reduce((s, p) => s + p.y, 0) / leftEye.length };
-        const rightEyeCenter = { x: rightEye.reduce((s, p) => s + p.x, 0) / rightEye.length, y: rightEye.reduce((s, p) => s + p.y, 0) / rightEye.length };
-
+        const leftEyeCenter = { x: leftEye.reduce((s: number, p: { x: number, y: number }) => s + p.x, 0) / leftEye.length, y: leftEye.reduce((s: number, p: { x: number, y: number }) => s + p.y, 0) / leftEye.length };
+        const rightEyeCenter = { x: rightEye.reduce((s: number, p: { x: number, y: number }) => s + p.x, 0) / rightEye.length, y: rightEye.reduce((s: number, p: { x: number, y: number }) => s + p.y, 0) / rightEye.length };
         const eyeDistance = rightEyeCenter.x - leftEyeCenter.x;
         const noseOffset = noseTop.x - (leftEyeCenter.x + eyeDistance / 2);
 
