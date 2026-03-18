@@ -74,11 +74,11 @@ export default function DashboardPage() {
                         <p className="text-slate-600 mt-1">Analytics and performance overview</p>
                     </div>
                     <div className="flex gap-3">
-                        <Link href="/history" className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-white transition-colors">
+                        <Link href="/history" className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-white text-black transition-colors">
                             View History
                         </Link>
                         <Link href="/" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                            New Interview
+                            Back to Home
                         </Link>
                     </div>
                 </div>
