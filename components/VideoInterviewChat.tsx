@@ -42,9 +42,26 @@ export function VideoInterviewChat({ interviewType }: VideoInterviewChatProps) {
     const [input, setInput] = useState("");
     const [isTyping, setIsTyping] = useState(false);
     const [questionCount, setQuestionCount] = useState(0);
-    const [userName, setUserName] = useState("");
-    const [userEmail, setUserEmail] = useState("");
-    const [showUserForm, setShowUserForm] = useState(true);
+    const [userName, setUserName] = useState(() => {
+        if (typeof window !== "undefined") {
+            const stored = localStorage.getItem("interview_user_info");
+            if (stored) return JSON.parse(stored).name || "";
+        }
+        return "";
+    });
+    const [userEmail, setUserEmail] = useState(() => {
+        if (typeof window !== "undefined") {
+            const stored = localStorage.getItem("interview_user_info");
+            if (stored) return JSON.parse(stored).email || "";
+        }
+        return "";
+    });
+    const [showUserForm, setShowUserForm] = useState(() => {
+        if (typeof window !== "undefined") {
+            return !localStorage.getItem("interview_user_info");
+        }
+        return true;
+    });
     const [isInterviewEnding, setIsInterviewEnding] = useState(false);
     const [awaitingUserQuestion, setAwaitingUserQuestion] = useState(false);
     const [showEndPrompt, setShowEndPrompt] = useState(false);
@@ -76,6 +93,17 @@ export function VideoInterviewChat({ interviewType }: VideoInterviewChatProps) {
     const analysisIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const cameraReadyRef = useRef(false);
     const modelsLoadedRef = useRef(false);
+
+    // Check for existing lead on mount
+    useEffect(() => {
+        const storedInfo = localStorage.getItem("interview_user_info");
+        if (storedInfo) {
+            const data = JSON.parse(storedInfo);
+            setUserName(data.name || "");
+            setUserEmail(data.email || "");
+            setShowUserForm(false);
+        }
+    }, []);
 
     // Initialize facial analysis models and webcam
     useEffect(() => {

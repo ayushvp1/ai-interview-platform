@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Code, Users, Briefcase, Play, Mic, Video, ChevronRight, Star, CheckCircle, TrendingUp, Award, Shield, Zap, BarChart3, Clock, Target } from "lucide-react";
+import { Menu, X, Code, Users, Briefcase, Play, Mic, Video, ChevronRight, Star, CheckCircle, TrendingUp, Award, Shield, Zap, BarChart3, Clock, Target } from "lucide-react";
 import { useEffect, useState } from "react";
-
+import CandidateGatekeeper from "@/components/CandidateGatekeeper";
 
 export default function Home() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showGatekeeper, setShowGatekeeper] = useState(false);
+
   // Clear any previous interview data when returning to home
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -20,25 +23,69 @@ export default function Home() {
     <main className="min-h-screen bg-slate-50">
 
       {/* Navigation Bar */}
-      <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <Link href="/" className="flex items-center gap-10">
-            <Image src="/logo.png" alt="AI Interview Platform" width={1000} height={1000} className="h-12 w-auto object-contain scale-300 origin-left" />
-          </Link>
-          <div className="flex items-center gap-10">
-            <Link href="/dashboard" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">
-              Dashboard
+      <nav className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 md:py-4">
+          <div className="flex justify-between items-center">
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/logo.png"
+                alt="AI Interview Platform"
+                width={160}
+                height={40}
+                className="h-10 md:h-12 w-auto object-contain"
+              />
             </Link>
-            <Link href="/history" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">
-              History
-            </Link>
-            <Link
-              href="#start"
-              className="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/25"
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-8">
+              <Link href="/dashboard" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">
+                Dashboard
+              </Link>
+              <Link href="/history" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">
+                History
+              </Link>
+              <button
+                onClick={() => setShowGatekeeper(true)}
+                className="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/25"
+              >
+                Start Interview
+              </button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden p-2 text-slate-600 hover:text-slate-900 transition-colors"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              Start Interview
-            </Link>
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
           </div>
+
+          {/* Mobile Navigation */}
+          {isMenuOpen && (
+            <div className="md:hidden pt-4 pb-2 space-y-3 border-t border-slate-100 mt-3 animate-in fade-in slide-in-from-top-2">
+              <Link
+                href="/dashboard"
+                className="block px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg font-medium transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/history"
+                className="block px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg font-medium transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                History
+              </Link>
+              <button
+                onClick={() => { setIsMenuOpen(false); setShowGatekeeper(true); }}
+                className="block w-full px-4 py-3 bg-blue-600 text-white text-center rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/25"
+              >
+                Start Interview
+              </button>
+            </div>
+          )}
         </div>
       </nav>
 
@@ -75,14 +122,14 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="#start"
+              <button
+                onClick={() => setShowGatekeeper(true)}
                 className="group inline-flex items-center justify-center gap-3 bg-white text-slate-900 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-50 transition-all shadow-xl"
               >
                 <Play className="w-5 h-5" />
                 Start Free Practice
                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
+              </button>
               <Link
                 href="/history"
                 className="inline-flex items-center justify-center gap-2 text-white px-8 py-4 rounded-xl font-semibold text-lg border-2 border-white/30 hover:bg-white/10 transition-all"
@@ -384,6 +431,19 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {showGatekeeper && (
+        <CandidateGatekeeper
+          interviewType="General"
+          onComplete={() => {
+            setShowGatekeeper(false);
+            const target = document.getElementById('start');
+            if (target) {
+              target.scrollIntoView({ behavior: 'smooth' });
+            }
+          }}
+        />
+      )}
     </main>
   );
 }

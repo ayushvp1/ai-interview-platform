@@ -1,8 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/.pnp
+node_modules/
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -43,3 +43,10 @@ next-env.d.ts
 # local data & artifacts
 /interview_logs
 ai_interview_platform.zip
+test_output.txt
+
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, User, Bot, StopCircle } from "lucide-react";
+import { Send, User, Bot, StopCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -34,9 +34,34 @@ export function InterviewChat({ interviewType }: InterviewChatProps) {
     const [input, setInput] = useState("");
     const [isTyping, setIsTyping] = useState(false);
     const [questionCount, setQuestionCount] = useState(0);
-    const [userName, setUserName] = useState("");
-    const [userEmail, setUserEmail] = useState("");
-    const [showUserForm, setShowUserForm] = useState(true);
+    const [userName, setUserName] = useState(() => {
+        if (typeof window !== "undefined") {
+            const stored = localStorage.getItem("interview_user_info");
+            if (stored) return JSON.parse(stored).name || "";
+        }
+        return "";
+    });
+    const [userEmail, setUserEmail] = useState(() => {
+        if (typeof window !== "undefined") {
+            const stored = localStorage.getItem("interview_user_info");
+            if (stored) return JSON.parse(stored).email || "";
+        }
+        return "";
+    });
+    const [userPhone, setUserPhone] = useState(() => {
+        if (typeof window !== "undefined") {
+            const stored = localStorage.getItem("interview_user_info");
+            if (stored) return JSON.parse(stored).phone || "";
+        }
+        return "";
+    });
+    const [showUserForm, setShowUserForm] = useState(() => {
+        if (typeof window !== "undefined") {
+            return !localStorage.getItem("interview_user_info");
+        }
+        return true;
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isInterviewEnding, setIsInterviewEnding] = useState(false);
     const [showEndPrompt, setShowEndPrompt] = useState(false);
     const [awaitingUserQuestion, setAwaitingUserQuestion] = useState(false);
@@ -50,23 +75,52 @@ export function InterviewChat({ interviewType }: InterviewChatProps) {
     }, [messages]);
 
     useEffect(() => {
-        // Store user info in localStorage when interview starts
-        if (!showUserForm && userName) {
-            // Clear any previous interview data
-            localStorage.removeItem("chat_history");
-
-            // Store new user info
-            localStorage.setItem("interview_user_info", JSON.stringify({
-                name: userName,
-                email: userEmail,
-                interview_type: interviewType,
-                started_at: new Date().toISOString()
-            }));
-
-            // Save initial message to localStorage
-            localStorage.setItem("chat_history", JSON.stringify(messages));
+        const storedInfo = localStorage.getItem("interview_user_info");
+        if (storedInfo) {
+            const data = JSON.parse(storedInfo);
+            setUserName(data.name || "");
+            setUserEmail(data.email || "");
+            setUserPhone(data.phone || "");
+            setShowUserForm(false);
         }
-    }, [showUserForm, userName, userEmail, interviewType, messages]);
+    }, []);
+
+    const handleStartInterview = async () => {
+        if (!userName.trim() || !userEmail.trim() || !userPhone.trim()) return;
+
+        const baseUrl = process.env.NEXT_PUBLIC_ADMIN_API_URL || "http://localhost:5000";
+        try {
+            const response = await fetch(`${baseUrl}/candidates`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: userName,
+                    email: userEmail,
+                    phone: userPhone,
+                    interviewType: interviewType
+                }),
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                // Store user info locally
+                localStorage.setItem("interview_user_info", JSON.stringify({
+                    name: userName,
+                    email: userEmail,
+                    phone: userPhone,
+                    interview_type: interviewType,
+                    started_at: new Date().toISOString()
+                }));
+                setShowUserForm(false);
+            }
+        } catch (error) {
+            console.error("Failed to save candidate:", error);
+            // Allow interview even if saving fails (UX priority)
+            setShowUserForm(false);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     // Countdown timer for auto-close
     useEffect(() => {
@@ -304,7 +358,7 @@ export function InterviewChat({ interviewType }: InterviewChatProps) {
 
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Email (Optional)
+                                Email Address *
                             </label>
                             <input
                                 type="email"
@@ -312,19 +366,30 @@ export function InterviewChat({ interviewType }: InterviewChatProps) {
                                 onChange={(e) => setUserEmail(e.target.value)}
                                 placeholder="john@example.com"
                                 className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900 placeholder:text-slate-400"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">
+                                Phone Number *
+                            </label>
+                            <input
+                                type="tel"
+                                value={userPhone}
+                                onChange={(e) => setUserPhone(e.target.value)}
+                                placeholder="+1 (555) 000-0000"
+                                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900 placeholder:text-slate-400"
+                                required
                             />
                         </div>
 
                         <button
-                            onClick={() => {
-                                if (userName.trim()) {
-                                    setShowUserForm(false);
-                                }
-                            }}
-                            disabled={!userName.trim()}
-                            className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            onClick={handleStartInterview}
+                            disabled={!userName.trim() || !userEmail.trim() || !userPhone.trim() || isSubmitting}
+                            className="w-full py-4 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
                         >
-                            Start {interviewType} Interview
+                            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : `Start ${interviewType} Interview`}
                         </button>
                     </div>
                 </div>
