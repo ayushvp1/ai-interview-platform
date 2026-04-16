@@ -4,7 +4,9 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Send, User, Bot, StopCircle, Mic, MicOff, Volume2, VolumeX, Video, VideoOff, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { loadFaceModels, analyzeFrame, aggregateMetrics, FaceAnalysisResult } from "@/lib/faceAnalysis";
+import CandidateGatekeeper from "./CandidateGatekeeper";
 
 interface Message {
     id: string;
@@ -27,6 +29,7 @@ interface VideoInterviewChatProps {
 }
 
 export function VideoInterviewChat({ interviewType }: VideoInterviewChatProps) {
+    const router = useRouter();
     const [messages, setMessages] = useState<Message[]>([
         {
             id: "1",
@@ -585,44 +588,16 @@ export function VideoInterviewChat({ interviewType }: VideoInterviewChatProps) {
 
     if (showUserForm) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] max-w-md mx-auto">
-                <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 w-full">
-                    <h2 className="text-2xl font-bold text-slate-900 mb-2">Video Interview</h2>
-                    <p className="text-slate-600 mb-6">Camera will analyze your body language</p>
-
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Full Name *</label>
-                            <input
-                                type="text"
-                                value={userName}
-                                onChange={(e) => setUserName(e.target.value)}
-                                placeholder="John Doe"
-                                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-green-500 text-slate-900 placeholder:text-slate-400"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Email (Optional)</label>
-                            <input
-                                type="email"
-                                value={userEmail}
-                                onChange={(e) => setUserEmail(e.target.value)}
-                                placeholder="john@example.com"
-                                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-green-500 text-slate-900 placeholder:text-slate-400"
-                            />
-                        </div>
-
-                        <button
-                            onClick={() => userName.trim() && setShowUserForm(false)}
-                            disabled={!userName.trim()}
-                            className="w-full py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
-                        >
-                            <Video size={20} />
-                            Start Video Interview
-                        </button>
-                    </div>
-                </div>
+            <div className="flex flex-col items-center justify-center min-h-[50vh]">
+                <CandidateGatekeeper
+                    interviewType={interviewType}
+                    onBack={() => router.push("/")}
+                    onComplete={(data) => {
+                        setUserName(data.name || "");
+                        setUserEmail(data.email || "");
+                        setShowUserForm(false);
+                    }}
+                />
             </div>
         );
     }

@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { User, Mail, Phone, ArrowRight, Loader2, ClipboardCheck } from "lucide-react";
+import { User, Mail, Phone, ArrowRight, Loader2, ClipboardCheck, X } from "lucide-react";
 
 interface CandidateFormProps {
     interviewType: string;
     onComplete: (data: any) => void;
+    onBack?: () => void;
 }
 
-export default function CandidateGatekeeper({ interviewType, onComplete }: CandidateFormProps) {
+export default function CandidateGatekeeper({ interviewType, onComplete, onBack }: CandidateFormProps) {
     const [formData, setFormData] = useState({ name: "", email: "", phone: "" });
     const [loading, setLoading] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
@@ -52,7 +53,16 @@ export default function CandidateGatekeeper({ interviewType, onComplete }: Candi
 
     return (
         <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-6">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden animate-in zoom-in-95 duration-300 relative">
+                {onBack && (
+                    <button
+                        onClick={onBack}
+                        className="absolute top-4 right-4 z-10 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                        title="Close"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
+                )}
                 <div className="bg-blue-600 p-8 text-white">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">

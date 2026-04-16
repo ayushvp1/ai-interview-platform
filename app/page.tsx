@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, Code, Users, Briefcase, Play, Mic, Video, ChevronRight, Star, CheckCircle, TrendingUp, Award, Shield, Zap, BarChart3, Clock, Target } from "lucide-react";
+import { Menu, X, Code, Users, Briefcase, Play, Mic, Video, ChevronRight, Star, CheckCircle, TrendingUp, Award, Shield, Zap, BarChart3, Clock, Target, Sparkles, PlayCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import CandidateGatekeeper from "@/components/CandidateGatekeeper";
 
@@ -23,80 +23,119 @@ export default function Home() {
     <main className="min-h-screen bg-slate-50">
 
       {/* Navigation Bar */}
-      <nav className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 md:py-4">
-          <div className="flex justify-between items-center">
-            <Link href="/" className="flex items-center">
-              <Image
-                src="/logo.png"
-                alt="AI Interview Platform"
-                width={160}
-                height={40}
-                className="h-10 md:h-12 w-auto object-contain"
-              />
+      <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-7xl mx-auto transition-all duration-500">
+        <div className="bg-white/90 backdrop-blur-md border border-slate-200/50 rounded-2xl shadow-2xl shadow-slate-200/40 px-6 h-16 flex items-center justify-between group">
+          <Link href="/" className="flex items-center shrink-0">
+            <Image
+              src="/logo.png"
+              alt="AI Interview Platform"
+              width={160}
+              height={40}
+              className="h-30 w-auto object-contain hover:opacity-80 transition-opacity"
+              priority
+            />
+          </Link>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-8">
+            <Link href="/" className="text-slate-600 hover:text-blue-600 font-bold text-sm tracking-wide transition-colors">
+              Home
             </Link>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-8">
-              <Link href="/dashboard" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">
-                Dashboard
-              </Link>
-              <Link href="/history" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">
-                History
-              </Link>
-              <button
-                onClick={() => setShowGatekeeper(true)}
-                className="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/25"
-              >
-                Start Interview
-              </button>
-            </div>
-
-            {/* Mobile Menu Button */}
+            <Link href="#about" className="text-slate-600 hover:text-blue-600 font-bold text-sm tracking-wide transition-colors">
+              About Us
+            </Link>
+            <Link href="#footer" className="text-slate-600 hover:text-blue-600 font-bold text-sm tracking-wide transition-colors">
+              Contact
+            </Link>
+            <div className="h-6 w-px bg-slate-200 mx-2" />
             <button
-              className="md:hidden p-2 text-slate-600 hover:text-slate-900 transition-colors"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => setShowGatekeeper(true)}
+              className="bg-blue-600 text-white px-7 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/30 active:scale-[0.98] border-2 border-transparent hover:border-blue-400/50"
             >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              Start Interview
             </button>
           </div>
 
-          {/* Mobile Navigation */}
-          {isMenuOpen && (
-            <div className="md:hidden pt-4 pb-2 space-y-3 border-t border-slate-100 mt-3 animate-in fade-in slide-in-from-top-2">
-              <Link
-                href="/dashboard"
-                className="block px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg font-medium transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/history"
-                className="block px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg font-medium transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                History
-              </Link>
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden p-2 text-slate-600 hover:text-slate-900 transition-colors bg-slate-100 rounded-lg"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div className="md:hidden pt-4 pb-2 space-y-3 bg-white/95 backdrop-blur-sm rounded-2xl border border-slate-200 shadow-xl mt-3 animate-in fade-in slide-in-from-top-2 overflow-hidden">
+            <Link
+              href="/"
+              className="block px-6 py-3 text-slate-600 hover:text-blue-600 hover:bg-slate-50 font-semibold transition-colors border-b border-slate-50"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Home
+            </Link>
+            <Link
+              href="#about"
+              className="block px-6 py-3 text-slate-600 hover:text-blue-600 hover:bg-slate-50 font-semibold transition-colors border-b border-slate-50"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              About Us
+            </Link>
+            <Link
+              href="#footer"
+              className="block px-6 py-3 text-slate-600 hover:text-blue-600 hover:bg-slate-50 font-semibold transition-colors border-b border-slate-50"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Contact
+            </Link>
+            <div className="p-4">
               <button
                 onClick={() => { setIsMenuOpen(false); setShowGatekeeper(true); }}
-                className="block w-full px-4 py-3 bg-blue-600 text-white text-center rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/25"
+                className="block w-full py-3 bg-blue-600 text-white text-center rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/25"
               >
                 Start Interview
               </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
       <section className="relative bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-            backgroundSize: '40px 40px'
-          }} />
+        {/* Enhanced Perspective Grid Background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Top Grid (Perspective) */}
+          <div className="absolute top-0 left-0 right-0 h-[40%] opacity-[0.15]" style={{ perspective: '1000px' }}>
+            <div className="absolute inset-0" style={{
+              backgroundImage: `
+                linear-gradient(to bottom, rgba(56, 189, 248, 0.2) 1px, transparent 1px),
+                linear-gradient(to right, rgba(56, 189, 248, 0.2) 1px, transparent 1px)
+              `,
+              backgroundSize: '60px 60px',
+              transform: 'rotateX(-75deg)',
+              transformOrigin: 'top center',
+              height: '200%'
+            }} />
+          </div>
+
+          {/* Bottom Grid (Perspective) */}
+          <div className="absolute bottom-0 left-0 right-0 h-[40%] opacity-[0.15]" style={{ perspective: '1000px' }}>
+            <div className="absolute inset-0" style={{
+              backgroundImage: `
+                linear-gradient(to top, rgba(56, 189, 248, 0.2) 1px, transparent 1px),
+                linear-gradient(to right, rgba(56, 189, 248, 0.2) 1px, transparent 1px)
+              `,
+              backgroundSize: '60px 60px',
+              transform: 'rotateX(75deg)',
+              transformOrigin: 'bottom center',
+              height: '200%',
+              top: '-100%'
+            }} />
+          </div>
+
+          {/* Vignette Overlay to focus center */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,#0f172a_85%)]" />
         </div>
 
         {/* Gradient Orbs */}
@@ -121,144 +160,161 @@ export default function Home() {
               body language, and communication skills. Land your dream job with confidence.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex justify-center">
               <button
                 onClick={() => setShowGatekeeper(true)}
-                className="group inline-flex items-center justify-center gap-3 bg-white text-slate-900 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-50 transition-all shadow-xl"
+                className="group inline-flex items-center justify-center gap-3 bg-white text-slate-900 px-10 py-5 rounded-2xl font-bold text-xl hover:bg-blue-50 transition-all shadow-2xl hover:scale-105 active:scale-95"
               >
-                <Play className="w-5 h-5" />
+                <Play className="w-6 h-6 fill-blue-600 text-blue-600" />
                 Start Free Practice
-                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
               </button>
-              <Link
-                href="/history"
-                className="inline-flex items-center justify-center gap-2 text-white px-8 py-4 rounded-xl font-semibold text-lg border-2 border-white/30 hover:bg-white/10 transition-all"
-              >
-                <BarChart3 className="w-5 h-5" />
-                View My Progress
-              </Link>
             </div>
           </div>
         </div>
       </section>
 
       {/* Interview Types Section */}
-      <section id="start" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-              Choose Your Interview Type
+      <section id="start" className="py-24 bg-slate-50 relative overflow-hidden">
+        {/* Technical Grid Background */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{
+          backgroundImage: `
+            linear-gradient(rgba(15, 23, 42, 0.5) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(15, 23, 42, 0.5) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px'
+        }} />
+        {/* Decorative background element */}
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-100/50 rounded-full blur-3xl opacity-50" />
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-100/50 rounded-full blur-3xl opacity-50" />
+
+        <div className="max-w-7xl mx-auto px-6 relative">
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full mb-4 text-sm font-bold tracking-wide">
+              <Zap className="w-4 h-4" />
+              SPECIALIZED PATHS
+            </div>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
+              Master Every <span className="text-blue-600">Interview Mode</span>
             </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Select from our comprehensive range of interview simulations designed to prepare you for any scenario
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+              Tailored simulations for the most in-demand roles. Choose your path and start perfecting your delivery.
             </p>
           </div>
 
-          {/* Main Interview Cards */}
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
-            {/* Technical */}
-            <div className="group relative bg-white rounded-2xl border-2 border-slate-200 hover:border-blue-500 transition-all duration-300 overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-              <div className="p-8">
-                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-blue-500 transition-colors">
-                  <Code className="w-8 h-8 text-blue-600 group-hover:text-white transition-colors" />
+          <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-10">
+            {/* Technical Interview Card */}
+            <div className="group h-full bg-white rounded-[2rem] border border-slate-200/60 p-8 shadow-xl shadow-slate-200/30 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 hover:-translate-y-2 flex flex-col relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110 duration-500" />
+
+              <div className="relative flex-1 flex flex-col">
+                <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/30 mb-8 group-hover:rotate-6 transition-transform">
+                  <Code className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-3">Technical Interview</h3>
-                <p className="text-slate-600 mb-6 leading-relaxed">
-                  Deep dive into coding, system design, and technical problem-solving. Perfect for software engineers.
+
+                <h3 className="text-2xl font-bold text-slate-900 mb-4 tracking-tight">Technical Interview</h3>
+                <p className="text-slate-600 mb-8 leading-relaxed min-h-[4rem]">
+                  Master complex algorithms, system design, and coding challenges with real-time feedback.
                 </p>
-                <ul className="space-y-2 mb-8">
-                  <li className="flex items-center gap-2 text-sm text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> Data Structures & Algorithms
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> System Design Questions
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> Code Review Scenarios
-                  </li>
-                </ul>
-                <div className="flex gap-3">
-                  <Link href="/interview/technical" className="flex-1 text-center py-3 bg-slate-900 text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors">
-                    Text
+
+                <div className="space-y-4 mb-10">
+                  {['Data Structures & Algorithms', 'System Architecture', 'Code Clarity & Optimization'].map((feature) => (
+                    <div key={feature} className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center">
+                        <CheckCircle className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <span className="text-sm font-medium text-slate-700">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-auto pt-6 border-t border-slate-100 flex items-center gap-3">
+                  <Link href="/interview/technical" className="flex-1 bg-slate-900 text-white px-4 py-3.5 rounded-xl font-bold text-center hover:bg-blue-600 transition-all shadow-lg hover:shadow-blue-600/20">
+                    Test Mode
                   </Link>
-                  <Link href="/interview/voice/technical" className="p-3 bg-slate-100 rounded-xl hover:bg-purple-100 transition-colors" title="Voice Interview">
-                    <Mic className="w-5 h-5 text-slate-600" />
+                  <Link href="/interview/voice/technical" className="p-3.5 bg-slate-50 text-slate-700 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-all border border-slate-100" title="Voice Interview">
+                    <Mic className="w-5 h-5" />
                   </Link>
-                  <Link href="/interview/video/technical" className="p-3 bg-slate-100 rounded-xl hover:bg-green-100 transition-colors" title="Video Interview">
-                    <Video className="w-5 h-5 text-slate-600" />
+                  <Link href="/interview/video/technical" className="p-3.5 bg-slate-50 text-slate-700 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-all border border-slate-100" title="Video Interview">
+                    <Video className="w-5 h-5" />
                   </Link>
                 </div>
               </div>
             </div>
 
-            {/* HR */}
-            <div className="group relative bg-white rounded-2xl border-2 border-slate-200 hover:border-emerald-500 transition-all duration-300 overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-emerald-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-              <div className="p-8">
-                <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-emerald-500 transition-colors">
-                  <Users className="w-8 h-8 text-emerald-600 group-hover:text-white transition-colors" />
+            {/* HR Interview Card */}
+            <div className="group h-full bg-white rounded-[2rem] border border-slate-200/60 p-8 shadow-xl shadow-slate-200/30 hover:shadow-2xl hover:shadow-emerald-200/40 transition-all duration-500 hover:-translate-y-2 flex flex-col relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50/50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110 duration-500" />
+
+              <div className="relative flex-1 flex flex-col">
+                <div className="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-600/30 mb-8 group-hover:-rotate-6 transition-transform">
+                  <Users className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-3">HR Interview</h3>
-                <p className="text-slate-600 mb-6 leading-relaxed">
-                  Master behavioral questions and showcase your soft skills. Essential for any job seeker.
+
+                <h3 className="text-2xl font-bold text-slate-900 mb-4 tracking-tight">HR Interview</h3>
+                <p className="text-slate-600 mb-8 leading-relaxed min-h-[4rem]">
+                  Perfect your storytelling and behavioral responses using the STAR method.
                 </p>
-                <ul className="space-y-2 mb-8">
-                  <li className="flex items-center gap-2 text-sm text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> Behavioral Questions
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> Culture Fit Assessment
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> STAR Method Practice
-                  </li>
-                </ul>
-                <div className="flex gap-3">
-                  <Link href="/interview/hr" className="flex-1 text-center py-3 bg-slate-900 text-white rounded-xl font-semibold hover:bg-emerald-600 transition-colors">
-                    Text
+
+                <div className="space-y-4 mb-10">
+                  {['Behavioral Analysis', 'Cultural Alignment', 'Conflict Resolution'].map((feature) => (
+                    <div key={feature} className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-50 flex items-center justify-center">
+                        <CheckCircle className="w-4 h-4 text-emerald-600" />
+                      </div>
+                      <span className="text-sm font-medium text-slate-700">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-auto pt-6 border-t border-slate-100 flex items-center gap-3">
+                  <Link href="/interview/hr" className="flex-1 bg-slate-900 text-white px-4 py-3.5 rounded-xl font-bold text-center hover:bg-emerald-600 transition-all shadow-lg hover:shadow-emerald-600/20">
+                    Test Mode
                   </Link>
-                  <Link href="/interview/voice/hr" className="p-3 bg-slate-100 rounded-xl hover:bg-purple-100 transition-colors" title="Voice Interview">
-                    <Mic className="w-5 h-5 text-slate-600" />
+                  <Link href="/interview/voice/hr" className="p-3.5 bg-slate-50 text-slate-700 rounded-xl hover:bg-emerald-50 hover:text-emerald-600 transition-all border border-slate-100" title="Voice Interview">
+                    <Mic className="w-5 h-5" />
                   </Link>
-                  <Link href="/interview/video/hr" className="p-3 bg-slate-100 rounded-xl hover:bg-green-100 transition-colors" title="Video Interview">
-                    <Video className="w-5 h-5 text-slate-600" />
+                  <Link href="/interview/video/hr" className="p-3.5 bg-slate-50 text-slate-700 rounded-xl hover:bg-emerald-50 hover:text-emerald-600 transition-all border border-slate-100" title="Video Interview">
+                    <Video className="w-5 h-5" />
                   </Link>
                 </div>
               </div>
             </div>
 
-            {/* Managerial */}
-            <div className="group relative bg-white rounded-2xl border-2 border-slate-200 hover:border-purple-500 transition-all duration-300 overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-purple-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-              <div className="p-8">
-                <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-purple-500 transition-colors">
-                  <Briefcase className="w-8 h-8 text-purple-600 group-hover:text-white transition-colors" />
+            {/* Managerial Interview Card */}
+            <div className="group h-full bg-white rounded-[2rem] border border-slate-200/60 p-8 shadow-xl shadow-slate-200/30 hover:shadow-2xl hover:shadow-purple-200/40 transition-all duration-500 hover:-translate-y-2 flex flex-col relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50/50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110 duration-500" />
+
+              <div className="relative flex-1 flex flex-col">
+                <div className="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-600/30 mb-8 group-hover:rotate-12 transition-transform">
+                  <Briefcase className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-3">Managerial Interview</h3>
-                <p className="text-slate-600 mb-6 leading-relaxed">
-                  Demonstrate leadership and strategic thinking. Built for aspiring and current managers.
+
+                <h3 className="text-2xl font-bold text-slate-900 mb-4 tracking-tight">Managerial Interview</h3>
+                <p className="text-slate-600 mb-8 leading-relaxed min-h-[4rem]">
+                  Demonstrate leadership potential and strategic decision-making capabilities.
                 </p>
-                <ul className="space-y-2 mb-8">
-                  <li className="flex items-center gap-2 text-sm text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> Leadership Scenarios
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> Team Management
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> Strategic Decision Making
-                  </li>
-                </ul>
-                <div className="flex gap-3">
-                  <Link href="/interview/managerial" className="flex-1 text-center py-3 bg-slate-900 text-white rounded-xl font-semibold hover:bg-purple-600 transition-colors">
-                    Text
+
+                <div className="space-y-4 mb-10">
+                  {['Team Leadership Keys', 'Strategic Roadmap Planning', 'KPI & Goal Delivery'].map((feature) => (
+                    <div key={feature} className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-purple-50 flex items-center justify-center">
+                        <CheckCircle className="w-4 h-4 text-purple-600" />
+                      </div>
+                      <span className="text-sm font-medium text-slate-700">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-auto pt-6 border-t border-slate-100 flex items-center gap-3">
+                  <Link href="/interview/managerial" className="flex-1 bg-slate-900 text-white px-4 py-3.5 rounded-xl font-bold text-center hover:bg-purple-600 transition-all shadow-lg hover:shadow-purple-600/20">
+                    Test Mode
                   </Link>
-                  <Link href="/interview/voice/managerial" className="p-3 bg-slate-100 rounded-xl hover:bg-purple-100 transition-colors" title="Voice Interview">
-                    <Mic className="w-5 h-5 text-slate-600" />
+                  <Link href="/interview/voice/managerial" className="p-3.5 bg-slate-50 text-slate-700 rounded-xl hover:bg-purple-50 hover:text-purple-600 transition-all border border-slate-100" title="Voice Interview">
+                    <Mic className="w-5 h-5" />
                   </Link>
-                  <Link href="/interview/video/managerial" className="p-3 bg-slate-100 rounded-xl hover:bg-green-100 transition-colors" title="Video Interview">
-                    <Video className="w-5 h-5 text-slate-600" />
+                  <Link href="/interview/video/managerial" className="p-3.5 bg-slate-50 text-slate-700 rounded-xl hover:bg-purple-50 hover:text-purple-600 transition-all border border-slate-100" title="Video Interview">
+                    <Video className="w-5 h-5" />
                   </Link>
                 </div>
               </div>
@@ -268,55 +324,70 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-              Why Professionals Choose Us
+      <section id="about" className="py-24 bg-white relative overflow-hidden">
+        {/* Technical Grid Background */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{
+          backgroundImage: `
+            linear-gradient(rgba(15, 23, 42, 0.5) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(15, 23, 42, 0.5) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px'
+        }} />
+        {/* Subtle background glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-50/50 rounded-full blur-3xl opacity-30 pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-6 relative">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
+              Why <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Professionals</span> Choose Us
             </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Advanced AI technology combined with proven interview techniques
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+              Experience the future of interview preparation with our industry-leading AI features.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-shadow">
-              <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
-                <Target className="w-7 h-7 text-blue-600" />
+          <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-8">
+            {/* Feature 1 */}
+            <div className="group bg-slate-50/50 backdrop-blur-sm p-8 rounded-[2.5rem] border border-slate-100 hover:border-blue-200 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/5 hover:-translate-y-2">
+              <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-8 shadow-xl shadow-blue-600/20 group-hover:scale-110 transition-transform">
+                <Target className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Real-time Feedback</h3>
-              <p className="text-slate-600">
-                Get instant AI-powered evaluation on your answers, tone, and delivery
+              <h3 className="text-2xl font-bold text-slate-900 mb-4 tracking-tight">Real-time Feedback</h3>
+              <p className="text-slate-600 leading-relaxed font-medium">
+                Get instant AI-powered evaluation on your answers, tone, and delivery while you speak.
               </p>
             </div>
 
-            <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-shadow">
-              <div className="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center mb-6">
-                <BarChart3 className="w-7 h-7 text-emerald-600" />
+            {/* Feature 2 */}
+            <div className="group bg-slate-50/50 backdrop-blur-sm p-8 rounded-[2.5rem] border border-slate-100 hover:border-emerald-200 transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-500/5 hover:-translate-y-2">
+              <div className="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center mb-8 shadow-xl shadow-emerald-600/20 group-hover:scale-110 transition-transform">
+                <BarChart3 className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Detailed Analytics</h3>
-              <p className="text-slate-600">
-                Track your progress with comprehensive scoring across multiple parameters
+              <h3 className="text-2xl font-bold text-slate-900 mb-4 tracking-tight">Detailed Analytics</h3>
+              <p className="text-slate-600 leading-relaxed font-medium">
+                Track your progress with comprehensive scoring across multiple professional parameters.
               </p>
             </div>
 
-            <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-shadow">
-              <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
-                <Video className="w-7 h-7 text-purple-600" />
+            {/* Feature 3 */}
+            <div className="group bg-slate-50/50 backdrop-blur-sm p-8 rounded-[2.5rem] border border-slate-100 hover:border-purple-200 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/5 hover:-translate-y-2">
+              <div className="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center mb-8 shadow-xl shadow-purple-600/20 group-hover:scale-110 transition-transform">
+                <Video className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Body Language Analysis</h3>
-              <p className="text-slate-600">
-                AI-powered analysis of your expressions, eye contact, and engagement
+              <h3 className="text-2xl font-bold text-slate-900 mb-4 tracking-tight">Body Language</h3>
+              <p className="text-slate-600 leading-relaxed font-medium">
+                AI analysis of your expressions, eye contact, and engagement to perfect your presence.
               </p>
             </div>
 
-            <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-shadow">
-              <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center mb-6">
-                <Clock className="w-7 h-7 text-amber-600" />
+            {/* Feature 4 */}
+            <div className="group bg-slate-50/50 backdrop-blur-sm p-8 rounded-[2.5rem] border border-slate-100 hover:border-amber-200 transition-all duration-500 hover:shadow-2xl hover:shadow-amber-500/5 hover:-translate-y-2">
+              <div className="w-16 h-16 bg-amber-500 rounded-2xl flex items-center justify-center mb-8 shadow-xl shadow-amber-600/20 group-hover:scale-110 transition-transform">
+                <Clock className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Practice Anytime</h3>
-              <p className="text-slate-600">
-                24/7 availability means you can practice whenever it suits your schedule
+              <h3 className="text-2xl font-bold text-slate-900 mb-4 tracking-tight">Practice Anytime</h3>
+              <p className="text-slate-600 leading-relaxed font-medium">
+                24/7 availability means you can practice whenever it suits your personal schedule.
               </p>
             </div>
           </div>
@@ -324,126 +395,205 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-              Success Stories
+      <section className="py-24 bg-slate-50 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 relative">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
+              Real Results, <span className="text-blue-600">Real Success</span>
             </h2>
-            <p className="text-lg text-slate-600">
-              See how our platform has helped professionals land their dream jobs
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+              Join thousands of professionals who have already achieved their career goals with our platform.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-slate-50 rounded-2xl p-8">
-              <div className="flex gap-1 mb-4">
-                {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />)}
-              </div>
-              <p className="text-slate-700 mb-6 italic">
-                "The AI feedback was incredibly accurate. After 5 practice sessions, I aced my Google interview. The video analysis helped me improve my body language significantly."
-              </p>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-                  SK
+          <div className="grid lg:grid-cols-3 gap-10">
+            {[
+              {
+                name: "Sarah K.",
+                role: "Software Engineer at Google",
+                content: "The AI feedback was incredibly accurate. After 5 practice sessions, I aced my Google interview. The video analysis helped me improve my body language significantly.",
+                color: "from-blue-500 to-blue-600",
+                initials: "SK"
+              },
+              {
+                name: "Michael R.",
+                role: "Product Manager at Meta",
+                content: "The behavioral interview practice was spot-on. I felt so prepared for my HR rounds. The personalized improvement tips made all the difference.",
+                color: "from-emerald-500 to-emerald-600",
+                initials: "MR"
+              },
+              {
+                name: "Aisha L.",
+                role: "Data Scientist at Amazon",
+                content: "As a non-native speaker, the voice interview feature helped me practice my communication. My clarity scores improved from 60% to 90% in just 2 weeks!",
+                color: "from-purple-500 to-purple-600",
+                initials: "AL"
+              }
+            ].map((testimonial, idx) => (
+              <div key={idx} className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col hover:shadow-2xl transition-all duration-500 group">
+                <div className="flex gap-1 mb-6">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400 drop-shadow-sm" />
+                  ))}
                 </div>
-                <div>
-                  <div className="font-semibold text-slate-900">Sarah K.</div>
-                  <div className="text-sm text-slate-500">Software Engineer at Google</div>
-                </div>
-              </div>
-            </div>
 
-            <div className="bg-slate-50 rounded-2xl p-8">
-              <div className="flex gap-1 mb-4">
-                {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />)}
-              </div>
-              <p className="text-slate-700 mb-6 italic">
-                "The behavioral interview practice was spot-on. I felt so prepared for my HR rounds. The personalized improvement tips made all the difference."
-              </p>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold">
-                  MR
+                <div className="relative mb-8">
+                  <span className="absolute -top-4 -left-2 text-6xl text-slate-100 font-serif leading-none select-none group-hover:text-blue-50 transition-colors">"</span>
+                  <p className="text-lg text-slate-700 font-medium leading-relaxed italic relative z-10">
+                    {testimonial.content}
+                  </p>
                 </div>
-                <div>
-                  <div className="font-semibold text-slate-900">Michael R.</div>
-                  <div className="text-sm text-slate-500">Product Manager at Meta</div>
-                </div>
-              </div>
-            </div>
 
-            <div className="bg-slate-50 rounded-2xl p-8">
-              <div className="flex gap-1 mb-4">
-                {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />)}
-              </div>
-              <p className="text-slate-700 mb-6 italic">
-                "As a non-native speaker, the voice interview feature helped me practice my communication. My clarity scores improved from 60% to 90% in just 2 weeks!"
-              </p>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                  AL
-                </div>
-                <div>
-                  <div className="font-semibold text-slate-900">Aisha L.</div>
-                  <div className="text-sm text-slate-500">Data Scientist at Amazon</div>
+                <div className="mt-auto flex items-center gap-4 pt-8 border-t border-slate-50">
+                  <div className={`w-14 h-14 bg-gradient-to-br ${testimonial.color} rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
+                    {testimonial.initials}
+                  </div>
+                  <div>
+                    <div className="font-bold text-slate-900 text-lg tracking-tight">{testimonial.name}</div>
+                    <div className="text-sm font-semibold text-blue-600/80">{testimonial.role}</div>
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 to-indigo-700">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Ready to Transform Your Interview Skills?
+      {/* Final CTA Section */}
+      <section className="py-24 relative overflow-hidden">
+        {/* Immersive background with mesh-style gradient */}
+        <div className="absolute inset-0 bg-slate-900" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/40 via-purple-600/40 to-indigo-900/40" />
+
+        {/* Floating decorative elements */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[100px] animate-pulse delay-700" />
+
+        <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full mb-8 border border-white/20">
+            <Sparkles className="w-4 h-4 text-blue-300" />
+            <span className="text-sm font-bold text-white tracking-widest uppercase">Start for Free</span>
+          </div>
+
+          <h2 className="text-5xl md:text-7xl font-extrabold text-white mb-8 tracking-tighter leading-[1.1]">
+            Ready to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">Transform</span> Your Career?
           </h2>
-          <p className="text-xl text-blue-100 mb-10">
-            Join thousands of professionals who have boosted their confidence and landed their dream jobs
+
+          <p className="text-xl md:text-2xl text-slate-300 mb-12 leading-relaxed font-medium">
+            Join 10,000+ professionals boosting their confidence and landing dream jobs. Start your journey today.
           </p>
-          <Link
-            href="#start"
-            className="inline-flex items-center gap-3 bg-white text-blue-600 px-10 py-5 rounded-2xl font-bold text-lg hover:bg-blue-50 transition-all shadow-2xl"
-          >
-            <Play className="w-6 h-6" />
-            Start Your First Interview - Free
-          </Link>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <button
+              onClick={() => setShowGatekeeper(true)}
+              className="group relative px-10 py-6 bg-white text-slate-900 rounded-[2rem] font-black text-xl shadow-2xl shadow-blue-500/20 hover:shadow-white/20 transition-all duration-500 hover:-translate-y-1 flex items-center gap-3 overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-10 transition-opacity" />
+              <PlayCircle className="w-7 h-7 text-blue-600 group-hover:scale-110 transition-transform" />
+              Start Free Practice
+            </button>
+
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 py-12">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <Link href="/" className="flex items-center gap-3">
-              <Image src="/logo.png" alt="AI Interview Platform" width={180} height={45} className="h-12 w-auto object-contain" />
-              <span className="text-xl font-bold text-white">AI Interview Platform</span>
-            </Link>
-            <div className="flex items-center gap-8 text-slate-400">
-              <Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
-              <Link href="/history" className="hover:text-white transition-colors">History</Link>
-              <Link href="/video-test" className="hover:text-white transition-colors">Video Test</Link>
+      {/* Premium Footer */}
+      <footer id="footer" className="bg-slate-950 text-slate-400 py-20 relative overflow-hidden">
+        {/* Subtle grid background for footer */}
+        <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)`,
+          backgroundSize: '30px 30px'
+        }} />
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+            {/* Brand Column */}
+            <div className="space-y-6">
+              <Link href="/" className="flex items-center gap-3">
+                <Image src="/logo.png" alt="AI Interview Platform" width={180} height={45} className="h-10 w-auto object-contain brightness-0 invert" />
+              </Link>
+              <p className="text-sm leading-relaxed text-slate-500 max-w-xs">
+                Empowering professionals to master their interview skills through cutting-edge AI technology and real-time personalized feedback.
+              </p>
+              <div className="flex items-center gap-4">
+                {['twitter', 'linkedin', 'github'].map((social) => (
+                  <Link key={social} href="#" className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center hover:bg-blue-600 hover:border-blue-500 transition-all group">
+                    <span className="capitalize text-xs font-bold text-slate-500 group-hover:text-white">{social[0]}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
-            <div className="text-slate-500 text-sm">
-              © 2026 Ai interview platform. All rights reserved.
+
+            {/* Quick Links */}
+            <div>
+              <h4 className="text-white font-bold mb-6 tracking-tight">Platform</h4>
+              <ul className="space-y-4 text-sm">
+                <li><Link href="/" className="hover:text-blue-400 transition-colors">Home</Link></li>
+                <li><Link href="#about" className="hover:text-blue-400 transition-colors">How it Works</Link></li>
+                <li><Link href="#start" className="hover:text-blue-400 transition-colors">Interview Paths</Link></li>
+                <li><Link href="#" className="hover:text-blue-400 transition-colors">Pricing</Link></li>
+              </ul>
+            </div>
+
+            {/* Resources */}
+            <div>
+              <h4 className="text-white font-bold mb-6 tracking-tight">Resources</h4>
+              <ul className="space-y-4 text-sm">
+                <li><Link href="#" className="hover:text-blue-400 transition-colors">Interview Blog</Link></li>
+                <li><Link href="#" className="hover:text-blue-400 transition-colors">Success Stories</Link></li>
+                <li><Link href="#" className="hover:text-blue-400 transition-colors">Help Center</Link></li>
+                <li><Link href="#" className="hover:text-blue-400 transition-colors">API for Enterprise</Link></li>
+              </ul>
+            </div>
+
+            {/* Contact Info */}
+            <div>
+              <h4 className="text-white font-bold mb-6 tracking-tight">Get in Touch</h4>
+              <ul className="space-y-4 text-sm">
+                <li className="flex items-start gap-3">
+                  <div className="w-5 h-5 rounded bg-blue-500/10 flex items-center justify-center mt-0.5">
+                    <Target className="w-3 h-3 text-blue-500" />
+                  </div>
+                  <span>Unit 19, Sahya Building, Govt. Cyber Park, Kozhikode, India</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="w-5 h-5 rounded bg-blue-500/10 flex items-center justify-center">
+                    <Zap className="w-3 h-3 text-blue-500" />
+                  </div>
+                  <span>support@ai-interview.com</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="text-xs text-slate-600 font-medium">
+              © 2026 AI Interview Platform. All rights reserved.
+            </div>
+            <div className="flex items-center gap-8 text-xs text-slate-600 font-medium">
+              <Link href="#" className="hover:text-slate-400 transition-colors">Privacy Policy</Link>
+              <Link href="#" className="hover:text-slate-400 transition-colors">Terms of Service</Link>
+              <Link href="#" className="hover:text-slate-400 transition-colors">Cookie Policy</Link>
             </div>
           </div>
         </div>
       </footer>
 
-      {showGatekeeper && (
-        <CandidateGatekeeper
-          interviewType="General"
-          onComplete={() => {
-            setShowGatekeeper(false);
-            const target = document.getElementById('start');
-            if (target) {
-              target.scrollIntoView({ behavior: 'smooth' });
-            }
-          }}
-        />
-      )}
+      {
+        showGatekeeper && (
+          <CandidateGatekeeper
+            interviewType="General"
+            onBack={() => setShowGatekeeper(false)}
+            onComplete={() => {
+              setShowGatekeeper(false);
+              const target = document.getElementById('start');
+              if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+          />
+        )
+      }
     </main>
   );
 }

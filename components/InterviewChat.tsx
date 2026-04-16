@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { Send, User, Bot, StopCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import CandidateGatekeeper from "./CandidateGatekeeper";
 
 interface Message {
     id: string;
@@ -19,6 +21,7 @@ interface InterviewChatProps {
 }
 
 export function InterviewChat({ interviewType }: InterviewChatProps) {
+    const router = useRouter();
     const [messages, setMessages] = useState<Message[]>([
         {
             id: "1",
@@ -336,63 +339,17 @@ export function InterviewChat({ interviewType }: InterviewChatProps) {
 
     if (showUserForm) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] max-w-md mx-auto">
-                <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 w-full">
-                    <h2 className="text-2xl font-bold text-slate-900 mb-2">Before We Begin</h2>
-                    <p className="text-slate-600 mb-6">Please provide your details for the interview log</p>
-
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Full Name *
-                            </label>
-                            <input
-                                type="text"
-                                value={userName}
-                                onChange={(e) => setUserName(e.target.value)}
-                                placeholder="John Doe"
-                                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900 placeholder:text-slate-400"
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Email Address *
-                            </label>
-                            <input
-                                type="email"
-                                value={userEmail}
-                                onChange={(e) => setUserEmail(e.target.value)}
-                                placeholder="john@example.com"
-                                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900 placeholder:text-slate-400"
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Phone Number *
-                            </label>
-                            <input
-                                type="tel"
-                                value={userPhone}
-                                onChange={(e) => setUserPhone(e.target.value)}
-                                placeholder="+1 (555) 000-0000"
-                                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900 placeholder:text-slate-400"
-                                required
-                            />
-                        </div>
-
-                        <button
-                            onClick={handleStartInterview}
-                            disabled={!userName.trim() || !userEmail.trim() || !userPhone.trim() || isSubmitting}
-                            className="w-full py-4 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
-                        >
-                            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : `Start ${interviewType} Interview`}
-                        </button>
-                    </div>
-                </div>
+            <div className="flex flex-col items-center justify-center min-h-[50vh]">
+                <CandidateGatekeeper
+                    interviewType={interviewType}
+                    onBack={() => router.push("/")}
+                    onComplete={(data) => {
+                        setUserName(data.name || "");
+                        setUserEmail(data.email || "");
+                        setUserPhone(data.phone || "");
+                        setShowUserForm(false);
+                    }}
+                />
             </div>
         );
     }
