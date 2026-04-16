@@ -7,7 +7,7 @@ import { adminFetch, setAdminToken } from "@/lib/admin-api";
 
 export default function AdminLoginPage() {
     const [username, setUsername] = useState("admin");
-    const [password, setPassword] = useState("admin123!@#");
+    const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const router = useRouter();
