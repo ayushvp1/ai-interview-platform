@@ -24,6 +24,17 @@ const candidateSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        password: {
+            type: String,
+            required: [true, "Password is required"],
+            minlength: [6, "Password must be at least 6 characters"],
+        },
+        resetOTP: {
+            type: String,
+        },
+        resetOTPExpires: {
+            type: Date,
+        },
         status: {
             type: String,
             enum: ["started", "completed", "abandoned"],
@@ -32,5 +43,17 @@ const candidateSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
+
+const bcrypt = require("bcryptjs");
+
+candidateSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) return next();
+    this.password = await bcrypt.hash(this.password, 12);
+    next();
+});
+
+candidateSchema.methods.comparePassword = async function (candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password);
+};
 
 module.exports = mongoose.model("Candidate", candidateSchema);

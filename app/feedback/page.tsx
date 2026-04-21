@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { CheckCircle, AlertCircle, TrendingUp, TrendingDown, Minus, BookOpen, Lightbulb, Target, BarChart3, Video, Eye, Smile } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { CheckCircle, AlertCircle, TrendingUp, TrendingDown, Minus, BookOpen, Lightbulb, Target, BarChart3, Video, Eye, Smile, Clock } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -46,7 +47,23 @@ interface VideoMetrics {
     dominantExpression: string;
 }
 
+// Main component wrapped in Suspense for search params
 export default function FeedbackPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <p className="text-slate-500">Loading Report...</p>
+            </div>
+        }>
+            <FeedbackContent />
+        </Suspense>
+    );
+}
+
+function FeedbackContent() {
+    const searchParams = useSearchParams();
+    const reportId = searchParams.get("id");
     const [loading, setLoading] = useState(true);
     const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -55,73 +72,82 @@ export default function FeedbackPage() {
     const [interviewMode, setInterviewMode] = useState<string>("");
 
     useEffect(() => {
-        const fetchEvaluation = async () => {
-            const storedHistory = localStorage.getItem("chat_history");
-            const storedUserInfo = localStorage.getItem("interview_user_info");
-            const storedVideoMetrics = localStorage.getItem("video_metrics");
-
-            console.log("Feedback Page - Loading data:", {
-                hasHistory: !!storedHistory,
-                hasUserInfo: !!storedUserInfo,
-                hasVideoMetrics: !!storedVideoMetrics
-            });
-
-            if (!storedHistory) {
-                console.log("No chat history found in localStorage");
-                setLoading(false);
-                return;
-            }
-
+        const fetchData = async () => {
+            setLoading(true);
+            setError(null);
             try {
-                const history = JSON.parse(storedHistory);
-                console.log("Chat history parsed, messages:", history.length);
-
-                const userInfo = storedUserInfo ? JSON.parse(storedUserInfo) : null;
-                setUserName(userInfo?.name || "");
-                setInterviewMode(userInfo?.mode || "");
-
-                // Load video metrics if available
-                if (storedVideoMetrics) {
-                    try {
-                        const metrics = JSON.parse(storedVideoMetrics);
-                        console.log("Video metrics loaded:", metrics);
-                        setVideoMetrics(metrics);
-                    } catch (e) {
-                        console.log("No valid video metrics");
+                if (reportId) {
+                    // ... existing report logic ...
+                    const response = await fetch(`/api/history/get?id=${encodeURIComponent(reportId)}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.evaluation) {
+                            setEvaluation(data.evaluation);
+                            setUserName(data.user_info?.name || "");
+                            setInterviewMode(data.user_info?.mode || "");
+                            if (data.video_metrics) setVideoMetrics(data.video_metrics);
+                        } else {
+                            setEvaluation(data);
+                        }
+                    } else {
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(errData.error || `Report not found (${response.status})`);
+                    }
+                } else {
+                    // Safety Delay: Wait 2 seconds to let AI rate limit cool down from the last chat message
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    const storedHistory = localStorage.getItem("chat_history");
+                    const storedUserInfo = localStorage.getItem("interview_user_info");
+                    const storedVideoMetrics = localStorage.getItem("video_metrics");
+                    
+                    if (!storedHistory) {
+                        setLoading(false);
+                        return;
+                    }
+                    
+                    const history = JSON.parse(storedHistory);
+                    const userInfo = storedUserInfo ? JSON.parse(storedUserInfo) : null;
+                    setUserName(userInfo?.name || "");
+                    setInterviewMode(userInfo?.mode || "");
+                    
+                    if (storedVideoMetrics) {
+                        try { setVideoMetrics(JSON.parse(storedVideoMetrics)); } catch (e) { }
+                    }
+                    
+                    const response = await fetch("/api/evaluate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            chat_history: history,
+                            user_info: userInfo
+                        }),
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        setEvaluation(data);
+                    } else {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.error || `Failed to generate evaluation: ${response.status}`);
                     }
                 }
-
-                console.log("Calling evaluate API...");
-                const response = await fetch("/api/evaluate", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        chat_history: history,
-                        user_info: userInfo
-                    }),
-                });
-
-                console.log("Evaluate API response status:", response.status);
-
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log("Evaluation data received:", data);
-                    setEvaluation(data);
-                } else {
-                    const errorText = await response.text();
-                    console.error("Evaluate API error:", response.status, errorText);
-                    setError(`Failed to generate evaluation: ${response.status}. Please try again.`);
-                }
             } catch (err: any) {
-                console.error("Feedback page error:", err);
-                setError(err.message || "An unexpected error occurred while loading your feedback.");
+                console.error("Feedback error:", err);
+                setError(err.message || "Failed to load feedback");
             } finally {
                 setLoading(false);
             }
         };
+        fetchData();
+    }, [reportId]);
 
-        fetchEvaluation();
-    }, []);
+    const handleRetry = () => {
+        setLoading(true);
+        setError(null);
+        // This will trigger the useEffect because it's the same reportId or fresh mount
+        window.location.reload(); 
+    };
 
     if (loading) {
         return (
@@ -133,20 +159,35 @@ export default function FeedbackPage() {
     }
 
     if (error) {
+        const isTooShort = error.includes("too short");
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen gap-4 p-6 text-center">
-                <AlertCircle className="h-12 w-12 text-red-500" />
-                <h2 className="text-xl font-bold text-slate-800">Evaluation Error</h2>
-                <p className="text-slate-600 max-w-md">{error}</p>
-                <div className="flex gap-4 mt-2">
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700"
+            <div className="flex flex-col items-center justify-center min-h-screen gap-6 bg-slate-950 p-6 text-center">
+                <div className="relative">
+                    <div className={cn("w-24 h-24 rounded-full flex items-center justify-center border", isTooShort ? "bg-amber-500/10 border-amber-500/20" : "bg-red-500/10 border-red-500/20")}>
+                        {isTooShort ? <Clock className="h-12 w-12 text-amber-500" /> : <AlertCircle className="h-12 w-12 text-red-500" />}
+                    </div>
+                    <div className={cn("absolute -top-1 -right-1 w-5 h-5 rounded-full animate-ping", isTooShort ? "bg-amber-500" : "bg-red-500")} />
+                </div>
+                <div className="space-y-3 max-w-md mx-auto">
+                    <h2 className="text-3xl font-black text-white tracking-tight">
+                        {isTooShort ? "Session Ended Early" : "Evaluation Error"}
+                    </h2>
+                    <p className="text-slate-400 text-lg leading-relaxed">
+                        {error}
+                    </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4 mt-4">
+                    <button 
+                        onClick={handleRetry}
+                        className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-700 transition-all shadow-2xl shadow-blue-600/20 hover:-translate-y-1 active:scale-95 flex items-center justify-center min-w-[200px]"
                     >
                         Try Again
                     </button>
-                    <Link href="/" className="px-6 py-2 border rounded-lg font-semibold hover:bg-slate-50">
-                        Back to Home
+                    <Link 
+                        href="/candidate/dashboard" 
+                        className="px-10 py-4 bg-slate-800 text-slate-300 rounded-2xl font-black text-lg hover:bg-slate-700 transition-all hover:-translate-y-1 active:scale-95 border border-slate-700 flex items-center justify-center min-w-[200px]"
+                    >
+                        Dashboard
                     </Link>
                 </div>
             </div>
@@ -155,10 +196,23 @@ export default function FeedbackPage() {
 
     if (!evaluation) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-                <AlertCircle className="h-12 w-12 text-red-500" />
-                <p className="text-slate-600">No interview data found to evaluate.</p>
-                <Link href="/" className="text-blue-600 hover:underline">Start New Interview</Link>
+            <div className="flex flex-col items-center justify-center min-h-screen gap-6 bg-slate-950 p-6 text-center">
+                <div className="relative">
+                    <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center border border-red-500/20">
+                        <AlertCircle className="h-10 w-10 text-red-500" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-ping" />
+                </div>
+                <div className="space-y-2">
+                    <h2 className="text-2xl font-bold text-white tracking-tight">No Data Found</h2>
+                    <p className="text-slate-400 max-w-xs mx-auto">We couldn't find any interview data to evaluate for this session.</p>
+                </div>
+                <Link 
+                    href="/candidate/dashboard" 
+                    className="mt-4 px-8 py-3 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/20 hover:-translate-y-1 active:scale-95"
+                >
+                    Back to Dashboard
+                </Link>
             </div>
         );
     }
@@ -426,22 +480,12 @@ export default function FeedbackPage() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex justify-center gap-4 pt-8">
+                <div className="flex justify-center pt-8">
                     <Link
-                        href="/history"
-                        className="px-8 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors"
+                        href="/candidate/dashboard"
+                        className="px-8 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-600/20"
                     >
-                        View All Reports
-                    </Link>
-                    <Link
-                        href="/"
-                        onClick={() => {
-                            localStorage.removeItem("chat_history");
-                            localStorage.removeItem("interview_user_info");
-                        }}
-                        className="px-8 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
-                    >
-                        Start New Interview
+                        Back to Dashboard
                     </Link>
                 </div>
 

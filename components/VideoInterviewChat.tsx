@@ -165,7 +165,7 @@ export function VideoInterviewChat({ interviewType }: VideoInterviewChatProps) {
         // Analyze face every 2 seconds for faster feedback
         analysisIntervalRef.current = setInterval(() => {
             analyzeCurrentFrame();
-        }, 2000);
+        }, 250);
     };
 
     const analyzeCurrentFrame = async () => {
@@ -180,8 +180,8 @@ export function VideoInterviewChat({ interviewType }: VideoInterviewChatProps) {
 
             setAnalysisResults(prev => {
                 const next = [...prev, result];
-                // Calculate live metrics from last 10 frames (sliding window) for reactivity
-                const slidingWindow = next.slice(-10);
+                // Calculate live metrics from last 4 frames (sliding window) for reactivity
+                const slidingWindow = next.slice(-4);
                 const aggregated = aggregateMetrics(slidingWindow);
                 setVideoMetrics({
                     eyeContactPercent: aggregated.eyeContactPercent,

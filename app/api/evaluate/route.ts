@@ -69,6 +69,13 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid chat history" }, { status: 400 });
         }
 
+        if (chat_history.length < 3) {
+            return NextResponse.json({ 
+                error: "Your interview was too short to generate a detailed report. Please complete at least 2-3 questions for a full analysis.",
+                isTooShort: true 
+            }, { status: 400 });
+        }
+
         const isVideoMode = user_info?.mode === "video";
 
         const prompt = `Analyze the following interview conversation and provide a comprehensive evaluation in JSON format.
@@ -119,32 +126,53 @@ Provide your response as a valid JSON object with these EXACT fields:
 
 Be specific, constructive, and provide actionable feedback. Respond with ONLY the JSON object, no markdown formatting.`;
 
-        const response = await fetch(`${LITEROUTER_BASE_URL}/chat/completions`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${LITEROUTER_API_KEY}`,
-            },
-            body: JSON.stringify({
-                model: "gemini-free",
-                messages: [
-                    { role: "user", content: prompt }
-                ],
-                max_tokens: 2048,
-                temperature: 0.3,
-            }),
-        });
+        let response;
+        let retries = 5; // Increased to 5 retries
+        let delay = 9000; // Increased to 9 seconds per retry to be safe
 
-        if (!response.ok) {
-            const errorData = await response.text();
-            console.error("LiteRouter API error:", response.status, errorData);
-            throw new Error(`API error: ${response.status}`);
+        while (retries > 0) {
+            response = await fetch(`${LITEROUTER_BASE_URL}/chat/completions`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${LITEROUTER_API_KEY}`,
+                },
+                body: JSON.stringify({
+                    model: "gemini-free",
+                    messages: [{ role: "user", content: prompt }],
+                    max_tokens: 2048,
+                    temperature: 0.3,
+                }),
+            });
+
+            if (response.status === 403 || response.status === 429) {
+                console.warn(`Rate limit hit. Retrying in ${delay/1000}s... (${retries} retries left)`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                retries--;
+                continue;
+            }
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error("LiteRouter API error:", response.status, errorData);
+                throw new Error(`API error: ${response.status}`);
+            }
+            
+            break; // Success
+        }
+
+        if (!response || !response.ok) {
+            throw new Error("Failed to reach AI provider after multiple retries.");
         }
 
         const data = await response.json();
         let text = data.choices?.[0]?.message?.content || "";
 
-        text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+        // Extract JSON block if AI includes markdown or extra text
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            text = jsonMatch[0];
+        }
 
         const evaluation = JSON.parse(text);
 

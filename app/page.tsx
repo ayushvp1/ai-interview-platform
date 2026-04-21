@@ -2,104 +2,40 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Menu, X, Code, Users, Briefcase, Play, Mic, Video, ChevronRight, Star, CheckCircle, TrendingUp, Award, Shield, Zap, BarChart3, Clock, Target, Sparkles, PlayCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import CandidateGatekeeper from "@/components/CandidateGatekeeper";
+import Navbar from "@/components/Navbar";
 
 export default function Home() {
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showGatekeeper, setShowGatekeeper] = useState(false);
+  const [gatekeeperMode, setGatekeeperMode] = useState<'login' | 'signup'>('signup');
 
-  // Clear any previous interview data when returning to home
+  // Redirect to dashboard if already logged in
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("chat_history");
-      localStorage.removeItem("interview_user_info");
-      localStorage.removeItem("video_metrics");
+    const token = localStorage.getItem("candidate_token");
+    const userInfo = localStorage.getItem("interview_user_info");
+    if (token && userInfo) {
+      router.push("/candidate/dashboard");
     }
-  }, []);
+  }, [router]);
 
   return (
     <main className="min-h-screen bg-slate-50">
 
-      {/* Navigation Bar */}
-      <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-7xl mx-auto transition-all duration-500">
-        <div className="bg-white/90 backdrop-blur-md border border-slate-200/50 rounded-2xl shadow-2xl shadow-slate-200/40 px-6 h-16 flex items-center justify-between group">
-          <Link href="/" className="flex items-center shrink-0">
-            <Image
-              src="/logo.png"
-              alt="AI Interview Platform"
-              width={160}
-              height={40}
-              className="h-30 w-auto object-contain hover:opacity-80 transition-opacity"
-              priority
-            />
-          </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
-            <Link href="/" className="text-slate-600 hover:text-blue-600 font-bold text-sm tracking-wide transition-colors">
-              Home
-            </Link>
-            <Link href="#about" className="text-slate-600 hover:text-blue-600 font-bold text-sm tracking-wide transition-colors">
-              About Us
-            </Link>
-            <Link href="#footer" className="text-slate-600 hover:text-blue-600 font-bold text-sm tracking-wide transition-colors">
-              Contact
-            </Link>
-            <div className="h-6 w-px bg-slate-200 mx-2" />
-            <button
-              onClick={() => setShowGatekeeper(true)}
-              className="bg-blue-600 text-white px-7 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/30 active:scale-[0.98] border-2 border-transparent hover:border-blue-400/50"
-            >
-              Start Interview
-            </button>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2 text-slate-600 hover:text-slate-900 transition-colors bg-slate-100 rounded-lg"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden pt-4 pb-2 space-y-3 bg-white/95 backdrop-blur-sm rounded-2xl border border-slate-200 shadow-xl mt-3 animate-in fade-in slide-in-from-top-2 overflow-hidden">
-            <Link
-              href="/"
-              className="block px-6 py-3 text-slate-600 hover:text-blue-600 hover:bg-slate-50 font-semibold transition-colors border-b border-slate-50"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link
-              href="#about"
-              className="block px-6 py-3 text-slate-600 hover:text-blue-600 hover:bg-slate-50 font-semibold transition-colors border-b border-slate-50"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              About Us
-            </Link>
-            <Link
-              href="#footer"
-              className="block px-6 py-3 text-slate-600 hover:text-blue-600 hover:bg-slate-50 font-semibold transition-colors border-b border-slate-50"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Contact
-            </Link>
-            <div className="p-4">
-              <button
-                onClick={() => { setIsMenuOpen(false); setShowGatekeeper(true); }}
-                className="block w-full py-3 bg-blue-600 text-white text-center rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/25"
-              >
-                Start Interview
-              </button>
-            </div>
-          </div>
-        )}
-      </nav>
+      <Navbar 
+        onSignInClick={() => {
+          setGatekeeperMode('login');
+          setShowGatekeeper(true);
+        }} 
+        onGetStartedClick={() => {
+          setGatekeeperMode('signup');
+          setShowGatekeeper(true);
+        }} 
+      />
 
       {/* Hero Section */}
       <section className="relative bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
@@ -162,7 +98,10 @@ export default function Home() {
 
             <div className="flex justify-center">
               <button
-                onClick={() => setShowGatekeeper(true)}
+                onClick={() => {
+                  setGatekeeperMode('signup');
+                  setShowGatekeeper(true);
+                }}
                 className="group inline-flex items-center justify-center gap-3 bg-white text-slate-900 px-10 py-5 rounded-2xl font-bold text-xl hover:bg-blue-50 transition-all shadow-2xl hover:scale-105 active:scale-95"
               >
                 <Play className="w-6 h-6 fill-blue-600 text-blue-600" />
@@ -485,7 +424,10 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <button
-              onClick={() => setShowGatekeeper(true)}
+              onClick={() => {
+                setGatekeeperMode('signup');
+                setShowGatekeeper(true);
+              }}
               className="group relative px-10 py-6 bg-white text-slate-900 rounded-[2rem] font-black text-xl shadow-2xl shadow-blue-500/20 hover:shadow-white/20 transition-all duration-500 hover:-translate-y-1 flex items-center gap-3 overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-10 transition-opacity" />
@@ -497,84 +439,26 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Premium Footer */}
-      <footer id="footer" className="bg-slate-950 text-slate-400 py-20 relative overflow-hidden">
+      {/* Simplified Premium Footer */}
+      <footer id="footer" className="bg-slate-950 text-slate-400 py-12 relative overflow-hidden">
         {/* Subtle grid background for footer */}
         <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{
           backgroundImage: `linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)`,
           backgroundSize: '30px 30px'
         }} />
 
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-            {/* Brand Column */}
-            <div className="space-y-6">
-              <Link href="/" className="flex items-center gap-3">
-                <Image src="/logo.png" alt="AI Interview Platform" width={180} height={45} className="h-10 w-auto object-contain brightness-0 invert" />
-              </Link>
-              <p className="text-sm leading-relaxed text-slate-500 max-w-xs">
-                Empowering professionals to master their interview skills through cutting-edge AI technology and real-time personalized feedback.
-              </p>
-              <div className="flex items-center gap-4">
-                {['twitter', 'linkedin', 'github'].map((social) => (
-                  <Link key={social} href="#" className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center hover:bg-blue-600 hover:border-blue-500 transition-all group">
-                    <span className="capitalize text-xs font-bold text-slate-500 group-hover:text-white">{social[0]}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* Quick Links */}
-            <div>
-              <h4 className="text-white font-bold mb-6 tracking-tight">Platform</h4>
-              <ul className="space-y-4 text-sm">
-                <li><Link href="/" className="hover:text-blue-400 transition-colors">Home</Link></li>
-                <li><Link href="#about" className="hover:text-blue-400 transition-colors">How it Works</Link></li>
-                <li><Link href="#start" className="hover:text-blue-400 transition-colors">Interview Paths</Link></li>
-                <li><Link href="#" className="hover:text-blue-400 transition-colors">Pricing</Link></li>
-              </ul>
-            </div>
-
-            {/* Resources */}
-            <div>
-              <h4 className="text-white font-bold mb-6 tracking-tight">Resources</h4>
-              <ul className="space-y-4 text-sm">
-                <li><Link href="#" className="hover:text-blue-400 transition-colors">Interview Blog</Link></li>
-                <li><Link href="#" className="hover:text-blue-400 transition-colors">Success Stories</Link></li>
-                <li><Link href="#" className="hover:text-blue-400 transition-colors">Help Center</Link></li>
-                <li><Link href="#" className="hover:text-blue-400 transition-colors">API for Enterprise</Link></li>
-              </ul>
-            </div>
-
-            {/* Contact Info */}
-            <div>
-              <h4 className="text-white font-bold mb-6 tracking-tight">Get in Touch</h4>
-              <ul className="space-y-4 text-sm">
-                <li className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded bg-blue-500/10 flex items-center justify-center mt-0.5">
-                    <Target className="w-3 h-3 text-blue-500" />
-                  </div>
-                  <span>Unit 19, Sahya Building, Govt. Cyber Park, Kozhikode, India</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded bg-blue-500/10 flex items-center justify-center">
-                    <Zap className="w-3 h-3 text-blue-500" />
-                  </div>
-                  <span>support@ai-interview.com</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="text-xs text-slate-600 font-medium">
-              © 2026 AI Interview Platform. All rights reserved.
-            </div>
-            <div className="flex items-center gap-8 text-xs text-slate-600 font-medium">
-              <Link href="#" className="hover:text-slate-400 transition-colors">Privacy Policy</Link>
-              <Link href="#" className="hover:text-slate-400 transition-colors">Terms of Service</Link>
-              <Link href="#" className="hover:text-slate-400 transition-colors">Cookie Policy</Link>
-            </div>
+        <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col items-center gap-8">
+          <Link href="/" className="flex items-center gap-3">
+            <Image 
+              src="/logo.png" 
+              alt="AI Interview Platform" 
+              width={300} 
+              height={75} 
+              className="h-16 w-auto object-contain brightness-0 invert opacity-80 hover:opacity-100 transition-opacity" 
+            />
+          </Link>
+          <div className="text-sm text-slate-500 font-medium tracking-wide">
+            © 2026 AI Interview Platform. All rights reserved.
           </div>
         </div>
       </footer>
@@ -583,13 +467,11 @@ export default function Home() {
         showGatekeeper && (
           <CandidateGatekeeper
             interviewType="General"
+            initialMode={gatekeeperMode}
             onBack={() => setShowGatekeeper(false)}
             onComplete={() => {
               setShowGatekeeper(false);
-              const target = document.getElementById('start');
-              if (target) {
-                target.scrollIntoView({ behavior: 'smooth' });
-              }
+              router.push("/candidate/dashboard");
             }}
           />
         )

@@ -1,5 +1,6 @@
-// Face Analysis Utilities using face-api.js
-let faceapi: any = null;
+import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
+
+let faceLandmarker: FaceLandmarker | null = null;
 let modelsLoaded = false;
 
 export interface ExpressionData {
@@ -17,9 +18,9 @@ export interface FaceAnalysisResult {
     confidence: number;
     eyeContact: boolean;
     headPose: {
-        yaw: number;  // left/right
-        pitch: number; // up/down
-        roll: number;  // tilt
+        yaw: number;
+        pitch: number;
+        roll: number;
     };
     timestamp: number;
 }
@@ -34,118 +35,112 @@ export interface AggregatedMetrics {
     overallBodyLanguageScore: number;
 }
 
-// Load face-api models
 export async function loadFaceModels(): Promise<boolean> {
     if (typeof window === 'undefined') return false;
-    if (modelsLoaded && faceapi) return true;
+    if (modelsLoaded && faceLandmarker) return true;
 
     try {
-        if (!faceapi) {
-            faceapi = await import('@vladmandic/face-api');
-        }
-
-        const MODEL_URL = '/models';
-
-        await Promise.all([
-            faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-            faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
-            faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
-        ]);
-
+        const filesetResolver = await FilesetResolver.forVisionTasks(
+            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+        );
+        faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
+            baseOptions: {
+                modelAssetPath: `/models/face_landmarker.task`,
+                delegate: "GPU"
+            },
+            outputFaceBlendshapes: true,
+            outputFacialTransformationMatrixes: true,
+            runningMode: "VIDEO",
+            numFaces: 1
+        });
         modelsLoaded = true;
-        console.log('Face detection models loaded');
+        console.log("MediaPipe Face Landmarker loaded");
         return true;
     } catch (error) {
-        console.error('Error loading face models:', error);
+        console.error("Error loading MediaPipe models:", error);
         return false;
     }
 }
 
-// Analyze a single frame
 export async function analyzeFrame(video: HTMLVideoElement): Promise<FaceAnalysisResult | null> {
-    if (!modelsLoaded) return null;
+    if (!modelsLoaded || !faceLandmarker) return null;
 
     try {
-        // Ensure video is ready before analysis
         if (video.paused || video.ended || video.readyState < 2) {
             return null;
         }
 
-        const detection = await faceapi
-            .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.2 }))
-            .withFaceLandmarks(true)
-            .withFaceExpressions();
+        const startTimeMs = performance.now();
+        const result = faceLandmarker.detectForVideo(video, startTimeMs);
 
-        if (!detection) return null;
+        if (!result.faceLandmarks || result.faceLandmarks.length === 0) {
+            return null;
+        }
 
-        const expressions = detection.expressions as ExpressionData;
+        const landmarks = result.faceLandmarks[0];
+        const blendshapes = result.faceBlendshapes?.[0]?.categories || [];
+        
+        // Map blendshapes to our ExpressionData interface
+        const shapes: Record<string, number> = {};
+        blendshapes.forEach(c => {
+            shapes[c.categoryName] = c.score;
+        });
 
-        // Estimate eye contact from landmarks
-        const landmarks = detection.landmarks;
-        const nose = landmarks.getNose();
-        const leftEye = landmarks.getLeftEye();
-        const rightEye = landmarks.getRightEye();
+        const expressions: ExpressionData = {
+            neutral: shapes['neutral'] || 0.5, // MediaPipe doesn't have a direct 'neutral' blendshape usually, we can estimate
+            happy: Math.max(shapes['mouthSmileLeft'] || 0, shapes['mouthSmileRight'] || 0),
+            sad: Math.max(shapes['browDownLeft'] || 0, shapes['browDownRight'] || 0, shapes['mouthFrownLeft'] || 0),
+            angry: Math.max(shapes['browDownLeft'] || 0, shapes['browDownRight'] || 0, shapes['mouthPressLeft'] || 0),
+            fearful: Math.max(shapes['browInnerUp'] || 0, shapes['eyeWideLeft'] || 0),
+            disgusted: Math.max(shapes['noseSneerLeft'] || 0, shapes['noseSneerRight'] || 0),
+            surprised: Math.max(shapes['eyeWideLeft'] || 0, shapes['eyeWideRight'] || 0, shapes['jawOpen'] || 0)
+        };
 
-        // Estimate head pose from landmarks for more precise eye contact
-        const noseTop = nose[0];
-        const noseBottom = nose[nose.length - 1];
-        const leftEyeCenter = { x: leftEye.reduce((s: number, p: { x: number, y: number }) => s + p.x, 0) / leftEye.length, y: leftEye.reduce((s: number, p: { x: number, y: number }) => s + p.y, 0) / leftEye.length };
-        const rightEyeCenter = { x: rightEye.reduce((s: number, p: { x: number, y: number }) => s + p.x, 0) / rightEye.length, y: rightEye.reduce((s: number, p: { x: number, y: number }) => s + p.y, 0) / rightEye.length };
-        const eyeDistance = rightEyeCenter.x - leftEyeCenter.x;
-        const noseOffset = noseTop.x - (leftEyeCenter.x + eyeDistance / 2);
+        // Estimate Neutral (it's the absence of other strong emotions)
+        const maxEmotion = Math.max(expressions.happy, expressions.sad, expressions.angry, expressions.fearful, expressions.disgusted, expressions.surprised);
+        expressions.neutral = Math.max(0, 1 - maxEmotion);
 
-        const yaw = noseOffset / eyeDistance * 45;
-        const pitch = (noseBottom.y - noseTop.y) / detection.detection.box.height * 30 - 15;
-        const roll = Math.atan2(rightEyeCenter.y - leftEyeCenter.y, eyeDistance) * 180 / Math.PI;
+        // Calculate Head Pose (Yaw, Pitch, Roll) from transformation matrix if available, 
+        // or estimate from landmarks. MediaPipe transformation matrix is more accurate.
+        let yaw = 0, pitch = 0, roll = 0;
+        if (result.facialTransformationMatrixes && result.facialTransformationMatrixes.length > 0) {
+            const matrix = result.facialTransformationMatrixes[0].data;
+            // Extract Euler angles from rotation matrix
+            pitch = Math.asin(-matrix[6]) * (180 / Math.PI);
+            yaw = Math.atan2(matrix[2], matrix[10]) * (180 / Math.PI);
+            roll = Math.atan2(matrix[4], matrix[5]) * (180 / Math.PI);
+        }
 
-        // Precise eye contact estimation:
-        // 1. Face must be relatively centered
-        // 2. Head must not be turned too far (Yaw < 15 deg)
-        // 3. Head must not be tilted up/down too far (Pitch < 15 deg)
-        const faceBox = detection.detection.box;
-        const videoWidth = video.videoWidth || 320;
-        const videoHeight = video.videoHeight || 240;
-        const faceCenterX = faceBox.x + faceBox.width / 2;
-        const faceCenterY = faceBox.y + faceBox.height / 2;
+        // Eye contact logic
+        const blinkLeft = shapes['eyeBlinkLeft'] || 0;
+        const blinkRight = shapes['eyeBlinkRight'] || 0;
+        const eyesOpen = blinkLeft < 0.4 && blinkRight < 0.4;
+        
+        // Face must be facing the camera (Yaw/Pitch within 15 degrees)
+        const isFacingCamera = Math.abs(yaw) < 18 && Math.abs(pitch) < 18;
+        
+        // Detection score is implicit in MediaPipe if we get landmarks
+        const eyeContact = eyesOpen && isFacingCamera;
 
-        const isCentered = Math.abs(faceCenterX - videoWidth / 2) < videoWidth * 0.2 &&
-            Math.abs(faceCenterY - videoHeight / 2) < videoHeight * 0.25;
-        const isFacingCamera = Math.abs(yaw) < 15 && Math.abs(pitch) < 15;
-
-        const eyeContact = isCentered && isFacingCamera;
-        // Calculate confidence score (0-1)
-        // Factors: Neutral/Happy are positive, Fearful/Sad/Disgusted are negative
-        // Eye contact is also a major confidence indicator
-        const positiveExpressions = expressions.neutral * 0.4 + expressions.happy * 0.4;
-        const negativeExpressions = expressions.fearful * 1.0 + expressions.sad * 0.6 + expressions.disgusted * 0.6;
-
-        // Base confidence from expressions
-        let confidenceScore = 0.5 + positiveExpressions - negativeExpressions;
-
-        // Eye contact bonus/penalty
-        confidenceScore += eyeContact ? 0.15 : -0.1;
-
-        // Confidence also suffers from extreme "surprised" (might look like panic)
-        confidenceScore -= expressions.surprised * 0.4;
+        // Confidence score calculation
+        const positiveExpressions = expressions.neutral * 0.4 + expressions.happy * 0.6;
+        const negativeExpressions = expressions.fearful * 1.0 + expressions.sad * 0.6 + expressions.angry * 0.4;
+        let confidenceScore = 0.4 + positiveExpressions - negativeExpressions;
+        confidenceScore += eyeContact ? 0.25 : -0.2;
 
         return {
             expressions,
             confidence: Math.max(0, Math.min(1, confidenceScore)),
             eyeContact,
-            headPose: {
-                yaw,
-                pitch,
-                roll
-            },
+            headPose: { yaw, pitch, roll },
             timestamp: Date.now()
         };
     } catch (error) {
-        console.error('Error analyzing frame:', error);
+        console.error("MediaPipe analysis error:", error);
         return null;
     }
 }
 
-// Aggregate multiple analysis results
 export function aggregateMetrics(results: FaceAnalysisResult[]): AggregatedMetrics {
     if (results.length === 0) {
         return {
@@ -159,14 +154,10 @@ export function aggregateMetrics(results: FaceAnalysisResult[]): AggregatedMetri
         };
     }
 
-    // Average confidence
     const avgConfidence = results.reduce((s, r) => s + r.confidence, 0) / results.length;
-
-    // Eye contact percentage
     const eyeContactCount = results.filter(r => r.eyeContact).length;
     const eyeContactPercent = (eyeContactCount / results.length) * 100;
 
-    // Expression distribution
     const expressionTotals: ExpressionData = { neutral: 0, happy: 0, sad: 0, angry: 0, fearful: 0, disgusted: 0, surprised: 0 };
     results.forEach(r => {
         Object.keys(expressionTotals).forEach(key => {
@@ -177,22 +168,17 @@ export function aggregateMetrics(results: FaceAnalysisResult[]): AggregatedMetri
         expressionTotals[key as keyof ExpressionData] /= results.length;
     });
 
-    // Dominant expression with slight bias away from 'neutral' for more interesting feedback
-    // If any emotion is > 20%, consider it significant
     let dominantExpression = "neutral";
     let maxVal = expressionTotals.neutral;
 
     Object.entries(expressionTotals).forEach(([exp, val]) => {
         if (exp === 'neutral') return;
-        // Boost non-neutral expressions to make "Mood" more reactive
-        const boostedVal = val * 1.5;
-        if (boostedVal > maxVal && boostedVal > 0.2) {
-            maxVal = boostedVal;
+        if (val > maxVal && val > 0.15) {
+            maxVal = val;
             dominantExpression = exp;
         }
     });
 
-    // Map to user-friendly "Mood" strings
     const moodMap: Record<string, string> = {
         neutral: "😐 Professional",
         happy: "😊 Positive",
@@ -204,26 +190,17 @@ export function aggregateMetrics(results: FaceAnalysisResult[]): AggregatedMetri
     };
 
     const displayMood = moodMap[dominantExpression] || "😐 Professional";
-
-    // Nervousness score (0-100)
-    // ... rest of the logic ...
-    const negativeImpact = (expressionTotals.fearful * 1.5 + expressionTotals.sad * 0.8 + expressionTotals.disgusted * 0.5 + expressionTotals.angry * 0.3);
+    const negativeImpact = (expressionTotals.fearful * 1.5 + expressionTotals.sad * 0.8 + expressionTotals.angry * 0.3);
     const nervousnessScore = Math.min(100, Math.round(negativeImpact * 100));
 
-    // Engagement score (0-100)
-    // Crucial: Eye contact is 70% of engagement, Expressions are 30%
-    const expressionEngagement = (expressionTotals.neutral * 0.3 + expressionTotals.happy * 0.6 + expressionTotals.surprised * 0.4);
-    const engagementScore = Math.round(
-        (eyeContactPercent * 0.7) +
-        (expressionEngagement * 30)
-    );
+    const expressionEngagement = Math.min(1, (expressionTotals.neutral * 0.5 + expressionTotals.happy * 1.0 + expressionTotals.surprised * 0.7));
+    const engagementScore = Math.round((eyeContactPercent * 0.7) + (expressionEngagement * 30));
 
-    // Overall body language score (0-100)
     const overallBodyLanguageScore = Math.round(
-        (avgConfidence * 40) +           // 40% Confidence (avgConfidence is 0-1, so scale to 0-40)
-        (eyeContactPercent * 0.3) +      // 30% Eye Contact (eyeContactPercent is 0-100)
-        (engagementScore * 0.2) +        // 20% Engagement
-        ((100 - nervousnessScore) * 0.1) // 10% Absence of nervousness
+        (avgConfidence * 40) +
+        (eyeContactPercent * 0.3) +
+        (engagementScore * 0.2) +
+        ((100 - nervousnessScore) * 0.1)
     );
 
     return {

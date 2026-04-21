@@ -42,6 +42,7 @@ next-env.d.ts
 
 # local data & artifacts
 /interview_logs
+*.xlsx
 ai_interview_platform.zip
 test_output.txt
 

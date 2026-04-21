@@ -179,79 +179,58 @@ export function InterviewChat({ interviewType }: InterviewChatProps) {
                 return;
             }
 
-            // If user says "yes" or asks a question
-            if (isYes || isQuestion || awaitingUserQuestion) {
-                setAwaitingUserQuestion(true);
-                const userReply: Message = {
-                    id: Date.now().toString(),
-                    role: "user",
-                    content: input,
-                    timestamp: new Date(),
-                };
-                setMessages((prev) => {
-                    const newHistory = [...prev, userReply];
-                    localStorage.setItem("chat_history", JSON.stringify(newHistory));
-                    return newHistory;
+            // Treat everything else as a question or final comment
+            setAwaitingUserQuestion(true);
+            const userReply: Message = {
+                id: Date.now().toString(),
+                role: "user",
+                content: input,
+                timestamp: new Date(),
+            };
+            setMessages((prev) => {
+                const newHistory = [...prev, userReply];
+                localStorage.setItem("chat_history", JSON.stringify(newHistory));
+                return newHistory;
+            });
+            setInput("");
+
+            setIsTyping(true);
+            try {
+                const conversationHistory = messages.map(m => ({ role: m.role, content: m.content }));
+                conversationHistory.push({ role: "user", content: input });
+
+                const response = await fetch("/api/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        messages: conversationHistory,
+                        type: interviewType
+                    }),
                 });
-                setInput("");
 
-                if (isYes && !isQuestion && input.length < 20) {
-                    setTimeout(() => {
-                        const aiReply: Message = {
-                            id: Date.now().toString() + "_prompt",
-                            role: "ai",
-                            content: "I'd be happy to answer! What would you like to know about the role, the company, or the interview process?",
-                            timestamp: new Date(),
-                        };
-                        setMessages((prev) => {
-                            const newHistory = [...prev, aiReply];
-                            localStorage.setItem("chat_history", JSON.stringify(newHistory));
-                            return newHistory;
-                        });
-                    }, 1000);
-                    return;
-                }
+                const data = await response.json();
 
-                // If it's an actual question, answer it and then end
-                setIsTyping(true);
-                try {
-                    const conversationHistory = messages.map(m => ({ role: m.role, content: m.content }));
-                    conversationHistory.push({ role: "user", content: input });
-
-                    const response = await fetch("/api/chat", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            messages: conversationHistory,
-                            type: interviewType
-                        }),
+                setTimeout(() => {
+                    const aiMsg: Message = {
+                        id: Date.now().toString() + "_answer",
+                        role: "ai",
+                        content: data.content + "\n\nThank you again for your time! Your evaluation is now ready.",
+                        timestamp: new Date(),
+                    };
+                    setMessages((prev) => {
+                        const newHistory = [...prev, aiMsg];
+                        localStorage.setItem("chat_history", JSON.stringify(newHistory));
+                        return newHistory;
                     });
-
-                    const data = await response.json();
-
-                    setTimeout(() => {
-                        const aiMsg: Message = {
-                            id: Date.now().toString() + "_answer",
-                            role: "ai",
-                            content: data.content + "\n\nThank you again for your time! Your evaluation is now ready.",
-                            timestamp: new Date(),
-                        };
-                        setMessages((prev) => {
-                            const newHistory = [...prev, aiMsg];
-                            localStorage.setItem("chat_history", JSON.stringify(newHistory));
-                            return newHistory;
-                        });
-                        setShowEndPrompt(true);
-                        setIsTyping(false);
-                    }, 1000);
-                } catch (err) {
+                    setShowEndPrompt(true);
                     setIsTyping(false);
-                }
-                return;
+                }, 1000);
+            } catch (err) {
+                setIsTyping(false);
             }
-
             return;
         }
+
 
         const userMsg: Message = {
             id: Date.now().toString(),
@@ -273,7 +252,13 @@ export function InterviewChat({ interviewType }: InterviewChatProps) {
 
         try {
             const conversationHistory = messages.map(m => ({ role: m.role, content: m.content }));
-            conversationHistory.push({ role: userMsg.role, content: userMsg.content });
+            
+            // If this is the final answer, instruct AI to wrap up
+            let userContent = userMsg.content;
+            if (newQuestionCount >= MAX_QUESTIONS) {
+                userContent += "\n\n(System Note: This is my final answer. Please acknowledge it and end the interview gracefully. Do not ask any more questions.)";
+            }
+            conversationHistory.push({ role: userMsg.role, content: userContent });
 
             const response = await fetch("/api/chat", {
                 method: "POST",
@@ -304,24 +289,12 @@ export function InterviewChat({ interviewType }: InterviewChatProps) {
                 return newHistory;
             });
 
-            // After final question, add thank you message with delay
-            if (newQuestionCount >= MAX_QUESTIONS + 1) {
-                setTimeout(async () => {
-                    // Add thank you message
-                    const thankYouMsg: Message = {
-                        id: Date.now().toString() + "_thanks",
-                        role: "ai",
-                        content: "Thank you so much for participating in this interview! You've done a great job. Do you have any questions for me before we wrap up?",
-                        timestamp: new Date(),
-                    };
-                    setMessages((prev) => {
-                        const newHistory = [...prev, thankYouMsg];
-                        localStorage.setItem("chat_history", JSON.stringify(newHistory));
-                        return newHistory;
-                    });
-                    setIsInterviewEnding(true);
-                }, 1500);
+            // Set ending state immediately after AI responds to final answer
+            if (newQuestionCount >= MAX_QUESTIONS) {
+                setIsInterviewEnding(true);
+                setShowEndPrompt(true);
             }
+
 
         } catch (error: any) {
             console.error("Chat error:", error);
